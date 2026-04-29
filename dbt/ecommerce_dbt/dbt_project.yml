@@ -1,0 +1,14 @@
+name: "ecommerce_dbt"
+version: "1.0.0"
+config-version: 2
+
+profile: "ecommerce_dbt"
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+
+models:
+  ecommerce_dbt:
+    +materialized: view

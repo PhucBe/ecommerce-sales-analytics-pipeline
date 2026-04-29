@@ -1,2 +1,24 @@
+# Python
 .venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Env
+.env
+
+# Logs/local data
+logs/
+data/
+
+# dbt
+dbt/ecommerce_dbt/target/
+dbt/ecommerce_dbt/dbt_packages/
+dbt/ecommerce_dbt/logs/
+dbt/profiles
+
+# OS/editor
 .vscode/
+.idea/
+.DS_Store
+
