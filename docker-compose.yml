@@ -63,7 +63,7 @@ services:
       - ./dbt/profiles:/root/.dbt
     entrypoint: ["bash", "-lc"]
     command: "tail -f /dev/null"
-    network:
+    networks:
       - ecommerce_network
 
   metabase:

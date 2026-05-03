@@ -1,0 +1,23 @@
+project:
+  name: ecommerce_sales_analytics
+
+paths:
+  log_dir: logs
+
+api:
+  base_url: http://localhost:8000
+  timeout_seconds: 30
+  page_limit: 500
+  endpoints:
+    customers: /customers
+    products: /products
+    orders: /orders
+    order_items: /order-items
+
+postgres:
+  schema_raw: raw_layer
+
+ingestion:
+  mode: full_refresh
+  source_system: mock_api
+  truncate_before_load: true

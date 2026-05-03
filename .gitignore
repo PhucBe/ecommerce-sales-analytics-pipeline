@@ -15,11 +15,8 @@ data/
 dbt/ecommerce_dbt/logs/
 dbt/ecommerce_dbt/target/
 dbt/ecommerce_dbt/dbt_packages/
-dbt/profiles/profiles.yml
 dbt/profiles/.user.yml
 dbt/profiles/profiles.yml
-dbt/ecommerce_dbt/packages.yml
-dbt/ecommerce_dbt/package-lock.yml
 
 # OS/editor
 .vscode/
