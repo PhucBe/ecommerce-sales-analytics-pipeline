@@ -26,9 +26,7 @@ select
     product_status,
     created_at,
     updated_at,
-    ingested_at,
-    batch_id,
-    source_system
+    ingested_at
 from {{ ref('stg_products') }}
 
 {% endsnapshot %}

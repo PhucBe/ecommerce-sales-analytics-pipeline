@@ -1,0 +1,293 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: SCD Type 2 customer dimension built from snp_customers snapshot.
+    columns:
+      - name: customer_version_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        tests:
+          - not_null
+
+      - name: customer_name
+        tests:
+          - not_null
+
+      - name: email
+
+      - name: phone
+
+      - name: city
+
+      - name: country
+
+      - name: customer_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - active
+                  - inactive
+                  - churned
+
+      - name: created_at
+
+      - name: updated_at
+
+      - name: ingested_at
+
+      - name: valid_from
+        tests:
+          - not_null
+
+      - name: valid_to
+        tests:
+          - not_null
+
+      - name: is_current
+        tests:
+          - not_null
+
+      - name: customer_version_number
+
+
+  - name: dim_product
+    description: SCD Type 2 product dimension built from snp_products snapshot.
+    columns:
+      - name: product_version_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: product_name
+        tests:
+          - not_null
+
+      - name: category
+
+      - name: brand
+
+      - name: unit_price
+        tests:
+          - not_null
+
+      - name: cost
+        tests:
+          - not_null
+
+      - name: product_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - active
+                  - inactive
+                  - discontinued
+
+      - name: created_at
+
+      - name: updated_at
+
+      - name: ingested_at
+
+      - name: valid_from
+        tests:
+          - not_null
+
+      - name: valid_to
+        tests:
+          - not_null
+
+      - name: is_current
+        tests:
+          - not_null
+
+      - name: product_version_number
+
+
+  - name: fct_orders
+    description: Order-level fact table enriched with customer SCD2 version key.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        tests:
+          - not_null
+
+      - name: customer_version_sk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_version_sk
+
+      - name: order_date
+        tests:
+          - not_null
+
+      - name: order_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pending
+                  - paid
+                  - shipped
+                  - completed
+                  - cancelled
+                  - refunded
+
+      - name: payment_method
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - credit_card
+                  - bank_transfer
+                  - e_wallet
+                  - cod
+
+      - name: shipping_city
+
+      - name: shipping_country
+
+      - name: subtotal
+        tests:
+          - not_null
+
+      - name: discount_amount
+        tests:
+          - not_null
+
+      - name: shipping_fee
+        tests:
+          - not_null
+
+      - name: total_amount
+        tests:
+          - not_null
+
+      - name: order_created_at
+
+      - name: order_updated_at
+
+      - name: ingested_at
+
+
+  - name: fct_order_items
+    description: Order item-level fact table enriched with customer and product SCD2 version keys.
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: customer_id
+        tests:
+          - not_null
+
+      - name: customer_version_sk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_version_sk
+
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: product_version_sk
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_version_sk
+
+      - name: order_date
+        tests:
+          - not_null
+
+      - name: order_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pending
+                  - paid
+                  - shipped
+                  - completed
+                  - cancelled
+                  - refunded
+
+      - name: payment_method
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - credit_card
+                  - bank_transfer
+                  - e_wallet
+                  - cod
+
+      - name: shipping_city
+
+      - name: shipping_country
+
+      - name: quantity
+        tests:
+          - not_null
+
+      - name: sold_unit_price
+        tests:
+          - not_null
+
+      - name: item_discount_amount
+        tests:
+          - not_null
+
+      - name: line_amount
+        tests:
+          - not_null
+
+      - name: product_unit_price_at_order
+
+      - name: product_cost_at_order
+
+      - name: estimated_cost_amount
+
+      - name: estimated_gross_margin_amount
+
+      - name: order_item_created_at
+
+      - name: order_item_updated_at
+
+      - name: ingested_at

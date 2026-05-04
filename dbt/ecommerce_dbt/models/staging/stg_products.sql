@@ -22,9 +22,7 @@ cleaned as (
         created_at::timestamptz as created_at,
         updated_at::timestamptz as updated_at,
 
-        ingested_at::timestamptz as ingested_at,
-        nullif(trim(batch_id), '') as batch_id,
-        nullif(trim(source_system), '') as source_system
+        ingested_at::timestamptz as ingested_at
     from source
 ),
 
@@ -49,8 +47,6 @@ select
     product_status,
     created_at,
     updated_at,
-    ingested_at,
-    batch_id,
-    source_system
+    ingested_at
 from deduplicated
 where row_num = 1
