@@ -1,0 +1,85 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data loaded from Mock API into PostgreSQL.
+    database: ecommerce
+    schema: raw_layer
+    loaded_at_field: ingested_at
+
+    tables:
+      - name: customers
+        identifier: raw_customers
+        description: Raw customer records from Mock API
+        columns:
+          - name: customer_id
+          - name: customer_name
+          - name: email
+          - name: phone
+          - name: city
+          - name: country
+          - name: customer_status
+          - name: created_at
+          - name: updated_at
+          - name: ingested_at
+          - name: batch_id
+          - name: source_system
+          - name: raw_payload
+
+      - name: products
+        identifier: raw_products
+        description: Raw product records from Mock API.
+        columns:
+          - name: product_id
+          - name: product_name
+          - name: category
+          - name: brand
+          - name: unit_price
+          - name: cost
+          - name: product_status
+          - name: created_at
+          - name: updated_at
+          - name: ingested_at
+          - name: batch_id
+          - name: source_system
+          - name: raw_payload
+
+      - name: orders
+        identifier: raw_orders
+        description: Raw order header records from Mock API.
+        columns:
+          - name: order_id
+          - name: customer_id
+          - name: order_date
+          - name: order_status
+          - name: payment_method
+          - name: shipping_city
+          - name: shipping_country
+          - name: subtotal
+          - name: discount_amount
+          - name: shipping_fee
+          - name: total_amount
+          - name: created_at
+          - name: updated_at
+          - name: ingested_at
+          - name: batch_id
+          - name: source_system
+          - name: raw_payload
+
+      - name: order_items
+        identifier: raw_order_items
+        description: Raw order line item records from Mock API.
+        columns:
+          - name: order_item_id
+          - name: order_id
+          - name: product_id
+          - name: quantity
+          - name: unit_price
+          - name: discount_amount
+          - name: line_amount
+          - name: created_at
+          - name: updated_at
+          - name: ingested_at
+          - name: batch_id
+          - name: source_system
+          - name: raw_payload

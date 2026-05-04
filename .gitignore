@@ -9,6 +9,7 @@ __pycache__/
 
 # Logs/local data
 logs/
+*.log
 data/
 
 # dbt

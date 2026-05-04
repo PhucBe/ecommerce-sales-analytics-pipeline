@@ -48,24 +48,6 @@ services:
     networks:
       - ecommerce_network
 
-  dbt:
-    image: ghcr.io/dbt-labs/dbt-postgres:1.8.2
-    container_name: ecommerce_dbt
-    restart: unless-stopped
-    env_file:
-      - .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    working_dir: /usr/app
-    volumes:
-      - ./dbt:/usr/app
-      - ./dbt/profiles:/root/.dbt
-    entrypoint: ["bash", "-lc"]
-    command: "tail -f /dev/null"
-    networks:
-      - ecommerce_network
-
   metabase:
     image: metabase/metabase:latest
     container_name: ecommerce_metabase

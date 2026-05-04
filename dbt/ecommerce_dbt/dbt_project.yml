@@ -5,10 +5,32 @@ config-version: 2
 profile: "ecommerce_dbt"
 
 model-paths: ["models"]
+analysis-paths: ["analyses"]
 seed-paths: ["seeds"]
 snapshot-paths: ["snapshots"]
 test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "logs"
 
 models:
   ecommerce_dbt:
-    +materialized: view
+    staging:
+      +schema: staging
+      +materialized: view
+
+    core:
+      +schema: core
+      +materialized: table
+
+    marts:
+      +schema: marts
+      +materialized: table
+
+snapshots:
+  ecommerce_dbt:
+    +target_schema: snapshots
