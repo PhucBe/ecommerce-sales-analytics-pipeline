@@ -1,0 +1,136 @@
+version: 2
+
+models:
+  - name: mart_daily_revenue
+    description: Daily revenue mart for BI dashboards. One row per order date.
+    columns:
+      - name: order_date
+        tests:
+          - not_null
+          - unique
+
+      - name: order_count
+        tests:
+          - not_null
+
+      - name: customer_count
+        tests:
+          - not_null
+
+      - name: gross_revenue
+        tests:
+          - not_null
+
+      - name: net_revenue
+        tests:
+          - not_null
+
+      - name: avg_order_value
+        tests:
+          - not_null
+
+
+  - name: mart_top_products
+    description: Product performance mart for BI dashboards. Aggregates units sold, order count, and revenue by product and category.
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_id
+
+      - name: product_name
+        tests:
+          - not_null
+
+      - name: category
+        tests:
+          - not_null
+
+      - name: units_sold
+        tests:
+          - not_null
+
+      - name: order_count
+        tests:
+          - not_null
+
+      - name: revenue
+        tests:
+          - not_null
+
+
+  - name: mart_customer_retention
+    description: Customer retention mart. One row per customer with first order date, last order date, total orders, total revenue, and repeat customer flag.
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_id
+
+      - name: first_order_date
+        tests:
+          - not_null
+
+      - name: last_order_date
+        tests:
+          - not_null
+
+      - name: total_orders
+        tests:
+          - not_null
+
+      - name: total_revenue
+        tests:
+          - not_null
+
+      - name: is_repeat_customer
+        tests:
+          - not_null
+
+
+  - name: mart_customer_churn
+    description: Customer churn mart. One row per customer with days since last order and churn flags at 30, 60, and 90 days.
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('mart_customer_retention')
+                field: customer_id
+
+      - name: last_order_date
+        tests:
+          - not_null
+
+      - name: days_since_last_order
+        tests:
+          - not_null
+
+      - name: churn_flag_30d
+        tests:
+          - not_null
+
+      - name: churn_flag_60d
+        tests:
+          - not_null
+
+      - name: churn_flag_90d
+        tests:
+          - not_null
+
+      - name: lifetime_orders
+        tests:
+          - not_null
+
+      - name: lifetime_revenue
+        tests:
+          - not_null
