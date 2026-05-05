@@ -93,6 +93,10 @@ models:
       - name: is_repeat_customer
         tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
 
 
   - name: mart_customer_churn
@@ -118,14 +122,26 @@ models:
       - name: churn_flag_30d
         tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
 
       - name: churn_flag_60d
         tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
 
       - name: churn_flag_90d
         tests:
           - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
 
       - name: lifetime_orders
         tests:
