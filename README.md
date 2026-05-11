@@ -1,6 +1,6 @@
-# 🏗️ Data Warehouse & Mart Build: Production ETL Pipeline
+# 🏗️ E-Commerce Sales Analytics Pipeline
 
-An end-to-end data engineering pipeline that transforms raw CSV files from Brazilian E-Commerce Public Dataset by Olist into a normalized star schema data warehouse, then builds analytical data marts.
+An end-to-end data engineering capstone project that generates synthetic e-commerce data from a Mock API, ingests it into PostgreSQL raw tables, transforms it with dbt across staging, snapshots, core, and marts layers, then serves business-ready analytics dashboards in Metabase.
 
 ![Data Pipeline Architecture](docs/screenshots/0.png)
 
@@ -8,40 +8,40 @@ An end-to-end data engineering pipeline that transforms raw CSV files from Brazi
 
 ## 🧾 Executive Summary (For Hiring Managers)
 
-- ✅ **Pipeline scope:** Built an end-to-end e-commerce analytics pipeline from raw Olist CSV files to S3, Redshift, dbt models, and BI-ready marts.
-- ✅ **Data modeling:** Designed a star-schema-style warehouse centered on `fact_order_items` with dimensions and marts for sales, products, customers, and sellers.
-- ✅ **ELT development:** Implemented Python ingestion to read CSV files, upload them to Amazon S3, and load Redshift raw tables with `COPY`.
-- ✅ **Transformation layer:** Structured dbt models across **staging → core → marts** for clean, reusable analytics modeling.
-- ✅ **Orchestration & analytics:** Designed the pipeline to be orchestrated by Airflow and consumed by BI dashboards for revenue, product, seller, and customer analysis.
+- ✅ **Pipeline scope:** Built an end-to-end e-commerce analytics pipeline from Mock API to PostgreSQL, dbt models, and BI-ready marts.
+- ✅ **Source simulation:** Created a synthetic e-commerce API using FastAPI + Faker with JSON endpoints for customers, products, orders, and order items.
+- ✅ **ETL development:** Implemented Python ingestion to fetch API data, normalize JSON records, and load PostgreSQL raw tables.
+- ✅ **Transformation layer:** Structured dbt models across **staging → snapshots/SCD2 → core → marts** for clean and historical analytics modeling.
+- ✅ **Analytics delivery:** Published business-ready marts for revenue, product performance, customer retention, and churn dashboards.
 
 ---
 
 ## 🧩 Problem & Context
 
-The business needs a trusted analytics warehouse that can answer questions such as:
+The business needs a trusted analytics pipeline that can answer questions such as:
 
-- revenue by day/month/quarter
+- revenue by day/month
 - top products and categories
-- seller performance
 - new vs. returning customers
-- service quality and delivery impact
+- customer retention and churn
+- product and customer historical changes
 
-**Challenge:** Raw operational CSVs into a warehouse that is consistent, reusable, and safe for BI. That means preserving raw data for replay, standardizing source tables, choosing the correct fact grain, separating dimensions from facts, and exposing marts that are easy for dashboards to query. In this project, the chosen analytical grain is 1 row per order item, because it supports accurate revenue calculation and natural analysis by product, category, seller, customer, and date.
+**Challenge:** Raw API data is not ready for BI. It arrives as JSON, needs cleaning, deduplication, type casting, validation, and historical tracking for customer/product changes.
 
-**Solution:** CSV files → S3 raw → Redshift raw tables → dbt staging → dbt core → dbt marts → BI dashboard, orchestrated by Airflow. This architecture creates a trusted source of truth for analytics and supports portfolio-ready dashboards such as Daily Sales Overview, Product / Category Performance, and Customer / Seller Overview.
+**Solution:** Mock API → PostgreSQL raw → dbt staging → dbt snapshots/SCD2 → dbt core → dbt marts → Metabase dashboard, orchestrated by Airflow. This creates a trusted source of truth for revenue, product performance, retention, and churn analytics.
 
 ---
 
 ## 🧰 Tech Stack
 
-- ☁️ **Storage:** Amazon S3 for raw CSV landing and replayable raw file storage.
-- 🐍 **Language:** Python for ingestion, S3 upload, Redshift raw loading, configuration, and logging.
-- ⚡ **Transformation:** dbt for building analytics models across **staging → core → marts**.
-- 🏛️ **Warehouse / Serving:** Amazon Redshift for raw-layer loading and analytics-ready warehouse tables.
-- 🐳 **Development Environment:** Docker / Docker Compose for local development and service orchestration. 
-- 📊 **Dashboarding:** Metabase for business dashboards on revenue, products, sellers, and customers.
-- 🔄 **Orchestration:** Apache Airflow for scheduling, dependency management, retries, and pipeline monitoring.  
-- 📦 **Version Control:** Git / GitHub for source control and portfolio publishing. 
+- ⚡ **API Source:** FastAPI + Faker for generating synthetic e-commerce JSON data.
+- 🐍 **Language:** Python for API ingestion, raw loading, validation, configuration, and logging.
+- 🐘 **Database / Warehouse:** PostgreSQL for raw tables, dbt models, snapshots, core, and marts.
+- 🔧 **Transformation:** dbt + dbt-postgres for **staging → snapshots/SCD2 → core → marts** modeling.
+- 🐳 **Development Environment:** Docker / Docker Compose for local services.
+- 📊 **Dashboarding:** Metabase for revenue, product, retention, and churn dashboards.
+- 🔄 **Orchestration:** Apache Airflow for scheduling, dependencies, retries, and monitoring.
+- 📦 **Version Control:** Git / GitHub for source control and portfolio publishing.
 
 ---
 
@@ -49,72 +49,156 @@ The business needs a trusted analytics warehouse that can answer questions such 
 
 ![Data Pipeline Architecture](docs/screenshots/0.png)
 
-The pipeline transforms job posting CSVs from Brazilian E-Commerce Public Dataset by Olist into a normalized star schema data warehouse, then builds specialized analytical data marts. BI tools (Metabase, Power BI, Tableau, Python) consume from both the warehouse and marts.
+The project follows an end-to-end analytics pipeline pattern:
 
-### Data Warehouse
+```text
+Generate -> Ingest -> Store -> Transform -> Serve -> Analyze
+```
 
-The data warehouse implements a star schema with `dim_customer`, `dim_product`, `dim_date`, `dim_seller`, `dim_review`, `dim_payment`, and `fact_order_items` tables.
+### 1. Data Source - Mock E-Commerce API
 
-![Data Warehouse Schema](docs/screenshots/1.png)
+The source system is a mock e-commerce API built with FastAPI + Faker.
 
-- **Core schema:** A star-schema-style warehouse centered on **`fact_order_items`** with supporting dimensions for customer, product, seller, payment, review, and date analysis.
-- **Purpose:** Provide a trusted analytical layer for revenue, product/category performance, seller performance, customer behavior, and service quality reporting.
-- **Grain:** 1 row per order item** in the fact table (`fact_order_items`).
-- **Modeling note:** Payment and review data originate at order level, so they must be joined carefully when used alongside line-item facts.
+API endpoints:
 
-### Mart Daily Sales
+```text
+GET /customers
+GET /products
+GET /orders
+GET /order-items
+GET /health
+```
 
-Daily sales summary for revenue and order trends.
+The API returns stable JSON records for customers, products, orders, and order_items. This simulates a real operational e-commerce system while keeping the project fully reproducible locally.
 
-![Mart Daily Sales](docs/screenshots/2.png)
+### 2. Ingestion Layer - Python ETL
 
-- **Mart schema:** `mart_daily_sales`
-- **Purpose:** Trend analysis for daily revenue and order volume.
-- **Grain:** **1 row per day**
-- **Key Features:** Revenue trend, order count trend, daily KPI reporting.
+Python scripts extract data from API endpoints and load the records into PostgreSQL raw tables.
 
-![Daily Sales Overview](docs/screenshots/3.png)
+Typical ingestion flow:
 
-### Mart Product Performance
+```text
+API Health Check
+  -> Fetch JSON from API
+  -> Parse / normalize records
+  -> Load into PostgreSQL raw tables
+  -> Log row counts
+  -> Validate raw data
+```
 
-Product and category analytics mart.
+### 3. Raw Storage - PostgreSQL Raw Layer
 
-![Mart Product Performance](docs/screenshots/4.png)
+PostgreSQL stores raw API records in a dedicated raw schema.
 
-- **Mart schema:** `mart_product_performance`
-- **Purpose:** Identify top products and top categories by business performance.
-- **Grain:** **1 row per product / category / analysis date grain**
-- **Key Features:** Product ranking, category ranking, revenue contribution.
+Raw tables:
 
-![Product/Category Performance](docs/screenshots/5.png)
+```text
+raw_customers
+raw_products
+raw_orders
+raw_order_items
+```
 
-### Mart Customer 360
+Each raw table keeps source fields plus technical metadata such as ingested_at, batch_id, source_system, and raw_payload. The raw layer acts as the replayable landing zone and preserves source-like data before business logic is applied.
 
-Customer behavior analytics mart.
+### 4. Transformation Layer - dbt
 
-![Mart Customer 360](docs/screenshots/6.png)
+dbt transforms raw data into analytics-ready tables.
 
-- **Mart schema:** `mart_customer_360`
-- **Purpose:** Analyze repeat customers, AOV, and recency patterns.
-- **Grain:** **1 row per customer**
-- **Key Features:** New vs. returning customers, customer value, purchase behavior.
+```text
+raw -> staging -> snapshots / SCD2 -> core -> marts
+```
 
-![Customer Overview](docs/screenshots/7.png)
+#### A. Staging Layer
 
+Staging models standardize raw source tables.
 
-### Mart Seller Performance
+```text
+stg_customers
+stg_products
+stg_orders
+stg_order_items
+```
 
-Seller performance tracking mart.
+#### B. Snapshots / SCD Type 2
 
-![Mart Seller Performance](docs/screenshots/8.png)
+dbt snapshots preserve historical changes for customer and product attributes.
 
-- **Mart schema:** `mart_seller_performance`
-- **Purpose:** Measure seller contribution and marketplace performance.
-- **Grain:** **1 row per seller**
-- **Key Features:** Seller ranking, seller revenue, seller quality/performance monitoring.
+```text
+snp_customers
+snp_products
+```
 
-![Seller Overview](docs/screenshots/9.png)
+#### C. Core Layer
 
+The core layer contains stable fact and dimension models.
+
+```text
+dim_customers
+dim_products
+fct_orders
+fct_order_items
+```
+
+Modeling logic:
+
+- Dimensions are built from dbt snapshots.
+- Facts are built from staging order and order-item data.
+- Facts join to SCD2 dimensions using business key, event date, and valid-from / valid-to windows.
+
+Recommended analytical grain:
+
+- fct_orders: 1 row per order.
+- fct_order_items: 1 row per order item.
+
+This separation keeps order-level metrics and line-item-level product revenue analysis clean.
+
+#### D. Marts Layer
+
+The marts layer exposes business-ready tables for dashboards and stakeholder analysis.
+
+```text
+mart_daily_revenue
+mart_top_products
+mart_customer_retention
+mart_customer_churn
+```
+
+### 5. Analytics / BI - Metabase
+
+Metabase consumes the dbt marts and turns them into business dashboards.
+
+Dashboard themes:
+
+- **Mart Daily Revenue**
+
+- **Mart Top Products**
+
+- **Mart Customer Retention**
+
+- **Mart Customer Churn**
+
+### 6. Orchestration & Monitoring - Apache Airflow
+
+Airflow coordinates the full pipeline as a scheduled DAG.
+
+```text
+Start
+  -> API Check
+  -> Ingest Raw Data
+  -> Validate Raw
+  -> dbt Snapshot
+  -> dbt Run Staging
+  -> dbt Run Core & Marts
+  -> dbt Test
+  -> Refresh BI / Success
+```
+
+Main orchestration file:
+
+```text
+airflow/dags/ecommerce_daily_pipeline.py
+```
 
 ---
 
@@ -122,23 +206,24 @@ Seller performance tracking mart.
 
 ### ETL / ELT Pipeline Development
 
-- **Extract & Load:** Built Python scripts to ingest raw Olist CSV files, upload them to Amazon S3, and load Redshift raw tables with `COPY`. 
-- **Config & Logging:** Implemented centralized config loading and reusable logging for pipeline execution. 
-- **Idempotent Loads:** Supported repeatable raw loads with schema creation and controlled truncation.
+- **API Ingestion:** Built Python scripts to fetch JSON data from FastAPI endpoints and load PostgreSQL raw tables.
+- **Config & Logging:** Implemented reusable configuration and logging for pipeline execution.
+- **Repeatable Loads:** Supported full-refresh / incremental-style raw loading with ingestion metadata.
 
-### Dimensional Modeling
+### Data Modeling
 
-- **Star Schema Design:** Modeled the warehouse around `fact_order_items` with reusable dimensions and analytics marts. 
-- **Grain Definition:** Chose **1 row per order item** as the core fact grain for accurate e-commerce analysis.
-- **Grain Safety:** Identified order-level payment/review data as sensitive joins that can cause double counting if modeled incorrectly.
+- **Layered Modeling:** Structured dbt models across **staging → snapshots/SCD2 → core → marts**.
+- **SCD Type 2:** Tracked historical changes for customers and products using dbt snapshots.
+- **Fact & Dimension Design:** Built `fct_orders`, `fct_order_items`, `dim_customers`, and `dim_products`.
 
 ### Transformation & Quality
 
-- **dbt Layering:** Organized transformations across **staging → core → marts**.
-- **Testing:** Applied data quality checks for nulls, uniqueness, relationships, and business rules.
-- **Standardization:** Used staging for cleaning, core for warehouse modeling, and marts for BI delivery.
+- **Staging Standardization:** Cleaned raw data with renaming, casting, trimming, status standardization, and deduplication.
+- **dbt Testing:** Applied data quality checks for nulls, uniqueness, relationships, accepted values, and business rules.
+- **Raw Validation:** Validated row counts, keys, dates, quantities, prices, and line amount logic before transformation.
 
 ### Orchestration & Analytics Delivery
 
-- **Airflow-Ready Design:** Structured the pipeline for orchestration, retry handling, and scheduled execution.
-- **BI Delivery:** Published marts for revenue, products, sellers, and customer behavior dashboards.
+- **Airflow DAG Design:** Orchestrated API check, ingestion, validation, dbt snapshot, dbt run, and dbt test.
+- **BI Delivery:** Published marts for revenue, product performance, customer retention, and churn dashboards.
+- **Portfolio-Ready Docs:** Documented architecture, data model, runbook, and README for project presentation.
