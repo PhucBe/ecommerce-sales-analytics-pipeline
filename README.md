@@ -171,12 +171,15 @@ Metabase consumes the dbt marts and turns them into business dashboards.
 Dashboard themes:
 
 - **Mart Daily Revenue**
+![Mart Daily Revenue](docs/screenshots/2.png)
 
 - **Mart Top Products**
+![Mart Top Products](docs/screenshots/3.png)
 
-- **Mart Customer Retention**
+  ![Mart Top Products](docs/screenshots/4.png)
 
 - **Mart Customer Churn**
+![Mart Customer Churn](docs/screenshots/5.png)
 
 ### 6. Orchestration & Monitoring - Apache Airflow
 
